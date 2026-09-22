@@ -87,3 +87,81 @@ body:before {
     background:linear-gradient(135deg,rgba(205,168,93,.14),rgba(205,168,93,.025));
   }
 }
+
+
+/* Hotel stars + clear internal phone extensions */
+.hotel-rating{margin:0 auto 16px;display:flex;flex-direction:column;align-items:center;gap:5px}
+.hotel-stars{color:#e7c46f;font:700 27px/1 "Montserrat",Arial,sans-serif;letter-spacing:.2em;text-shadow:0 3px 16px rgba(231,196,111,.28)}
+.hotel-rating strong{color:#f4e5c6;font:700 9px/1.2 "Montserrat",Arial,sans-serif;letter-spacing:.22em;text-transform:uppercase}
+.quick-service{width:min(620px,92vw);margin:0 auto 18px;display:grid;grid-template-columns:repeat(3,1fr);border:1px solid rgba(205,168,93,.48);background:rgba(12,5,6,.72);box-shadow:0 14px 32px rgba(0,0,0,.28);backdrop-filter:blur(10px)}
+.quick-service-card{min-height:62px;display:flex;align-items:center;justify-content:center;gap:10px;padding:9px 12px;border-right:1px solid rgba(205,168,93,.24)}
+.quick-service-card:last-child{border-right:0}.service-phone{width:31px;height:31px;display:grid;place-items:center;flex:none;border:1px solid rgba(205,168,93,.68);border-radius:50%;color:#e3c272;font-size:17px;line-height:1}
+.quick-service-card div{display:grid;text-align:left}.quick-service-card small{color:#c7b8aa;font:700 8px/1.15 "Montserrat",Arial,sans-serif;letter-spacing:.05em;text-transform:uppercase}.quick-service-card b{margin-top:4px;color:#f0d28b;font:800 20px/1 "Montserrat",Arial,sans-serif;letter-spacing:.02em}
+@media(max-width:640px){
+ .hotel-rating{margin-bottom:11px}.hotel-stars{font-size:23px}.hotel-rating strong{font-size:7.5px;letter-spacing:.16em}
+ .quick-service{width:min(96vw,430px);margin-bottom:13px}.quick-service-card{min-height:54px;gap:7px;padding:7px 5px}.service-phone{width:26px;height:26px;font-size:14px}.quick-service-card small{font-size:6.4px}.quick-service-card b{font-size:16px}
+ .hero{padding-top:104px}
+}
+
+/* V3 hotfix — mobile alignment / overflow corrections for hotel rating + extensions */
+.hero-content{width:min(100%,850px)}
+.quick-service{max-width:100%;box-sizing:border-box}
+.quick-service-card{min-width:0}
+.quick-service-card div{min-width:0}
+
+@media(max-width:640px){
+  html,body{max-width:100%;overflow-x:hidden}
+  .hero{padding-left:17px!important;padding-right:17px!important}
+  .hero-content{width:100%;max-width:100%}
+  .hotel-rating{width:100%;margin:0 auto 10px}
+  .hotel-stars{font-size:22px;letter-spacing:.12em;padding-left:.12em;white-space:nowrap}
+  .hotel-rating strong{max-width:100%;font-size:7px;letter-spacing:.12em;text-align:center;white-space:normal}
+  .quick-service{
+    width:100%!important;
+    max-width:100%!important;
+    margin:0 auto 14px!important;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+  }
+  .quick-service-card{
+    width:auto;min-width:0;min-height:52px;
+    gap:5px;padding:7px 4px;
+    overflow:hidden;
+  }
+  .service-phone{width:24px;height:24px;font-size:12px}
+  .quick-service-card div{min-width:0;overflow:hidden}
+  .quick-service-card small{font-size:5.8px;letter-spacing:.02em;white-space:nowrap}
+  .quick-service-card b{font-size:15px;white-space:nowrap}
+  .hero-frame{left:10px!important;right:10px!important}
+}
+
+@media(max-width:380px){
+  .quick-service-card{gap:4px;padding-inline:3px}
+  .service-phone{width:22px;height:22px;font-size:11px}
+  .quick-service-card small{font-size:5.3px}
+  .quick-service-card b{font-size:14px}
+}
+
+
+/* V4 product-image fit fix — tall bottles/cans stay fully visible without changing food-photo crops */
+.product-thumb.portrait-product{
+  object-fit:contain!important;
+  object-position:center!important;
+  padding:3px!important;
+  background:#f3f0e8!important;
+  filter:saturate(.9) contrast(1.02)!important;
+}
+@media(max-width:640px){
+  .product-row:has(.product-thumb){
+    align-items:start!important;
+  }
+  .product-row:has(.product-thumb) .product-thumb{
+    box-sizing:border-box!important;
+  }
+  .product-row:has(.product-thumb) .product-price{
+    min-height:32px!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    line-height:1!important;
+  }
+}

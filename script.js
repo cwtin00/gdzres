@@ -872,8 +872,8 @@ const navShell = document.getElementById("navShell");
 let currentLanguage = localStorage.getItem("gdz-language") === "en" ? "en" : "tr";
 
 const uiText = {
-  tr: {reservation:"Rezervasyon", eyebrow:"Gediz'de seçkin lezzetler", heroTitle:"Gecenin", heroSubtitle:"Lezzet Hali", heroText:"Ateşte ustalık, sofrada zarafet.", explore:"Menüyü Keşfet", food:"Yemek", drink:"İçki", enjoy:"Keyif", menuCategories:"Menü Kategorileri", footerTagline:"Sofranıza değer, gecenize tat katıyoruz.", location:"Konum", kitchen:"Mutfaktan & bardan", selection:"Seçkimiz", vat:"Fiyatlarımıza KDV dahildir", choices:"seçenek", current:"Güncel menü"},
-  en: {reservation:"Reservation", eyebrow:"Distinguished flavours in Gediz", heroTitle:"The Night", heroSubtitle:"Served with Taste", heroText:"Mastery over fire, elegance at the table.", explore:"Explore the Menu", food:"Dining", drink:"Drinks", enjoy:"Moments", menuCategories:"Menu Categories", footerTagline:"Adding value to your table and flavour to your evening.", location:"Location", kitchen:"From the kitchen & bar", selection:"Our Selection", vat:"VAT is included in our prices", choices:"choices", current:"Current menu"}
+  tr: {reservation:"Rezervasyon", hotelRestaurant:"3 Yıldızlı Otel Restoranı", restaurantLabel:"Restaurant", kitchenLabel:"Mutfak", receptionLabel:"Resepsiyon", eyebrow:"Gediz'de seçkin lezzetler", heroTitle:"Gecenin", heroSubtitle:"Lezzet Hali", heroText:"Ateşte ustalık, sofrada zarafet.", explore:"Menüyü Keşfet", food:"Yemek", drink:"İçki", enjoy:"Keyif", menuCategories:"Menü Kategorileri", footerTagline:"Sofranıza değer, gecenize tat katıyoruz.", location:"Konum", kitchen:"Mutfaktan & bardan", selection:"Seçkimiz", vat:"Fiyatlarımıza KDV dahildir", choices:"seçenek", current:"Güncel menü"},
+  en: {reservation:"Reservation", hotelRestaurant:"3-Star Hotel Restaurant", restaurantLabel:"Restaurant", kitchenLabel:"Kitchen", receptionLabel:"Reception", eyebrow:"Distinguished flavours in Gediz", heroTitle:"The Night", heroSubtitle:"Served with Taste", heroText:"Mastery over fire, elegance at the table.", explore:"Explore the Menu", food:"Dining", drink:"Drinks", enjoy:"Moments", menuCategories:"Menu Categories", footerTagline:"Adding value to your table and flavour to your evening.", location:"Location", kitchen:"From the kitchen & bar", selection:"Our Selection", vat:"VAT is included in our prices", choices:"choices", current:"Current menu"}
 };
 
 const categoryTitlesEn = {"ana-yemekler":"Main Courses",mezeler:"Meze", "ara-sicaklar":"Hot Starters",aperatifler:"Appetizers",salatalar:"Salads",makarnalar:"Pasta","meyve-tabagi":"Fruit Platter",atistirmaliklar:"Snacks",icecekler:"Drinks",rakilar:"Raki",votkalar:"Vodka",viskiler:"Whisky",ginler:"Gin",tekilalar:"Tequila",biralar:"Beer"};
@@ -992,11 +992,28 @@ function showCategory(categoryId, shouldScroll = false) {
         </div>
       </header>
       <div class="menu-paper">
-        <div class="paper-head"><span>${uiText[currentLanguage].selection}</span><small>${uiText[currentLanguage].vat}</small></div>
+        <div class="paper-head"><span>${categoryTitle(category)}</span><small>${uiText[currentLanguage].vat}</small></div>
         <div class="product-list">${contentHtml}</div>
       </div>
     </section>
   `;
+  // Only bottle/can-heavy drink categories use contain-fit for tall product photos.
+  // Food photos stay cropped with object-fit: cover even when the source image is portrait.
+  const containPhotoCategories = new Set([
+    "icecekler", "rakilar", "votkalar", "viskiler", "ginler", "tekilalar", "biralar"
+  ]);
+  if (containPhotoCategories.has(category.id)) {
+    menuWrapper.querySelectorAll(".product-thumb").forEach(img => {
+      const classifyProductImage = () => {
+        if (!img.naturalWidth || !img.naturalHeight) return;
+        const ratio = img.naturalHeight / img.naturalWidth;
+        img.classList.toggle("portrait-product", ratio > 1.22);
+      };
+      if (img.complete) classifyProductImage();
+      else img.addEventListener("load", classifyProductImage, { once: true });
+    });
+  }
+
   if (shouldScroll) {
     const menuTop = menuWrapper.getBoundingClientRect().top + window.scrollY - 125;
     window.scrollTo({ top: Math.max(menuTop, 0), behavior: "smooth" });
