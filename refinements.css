@@ -165,3 +165,82 @@ body:before {
     line-height:1!important;
   }
 }
+
+
+/* FINAL mobile polish: clean white bottle tiles + stable non-emoji service phone icons */
+.product-thumb.portrait-product{
+  background:#fff!important;
+}
+.service-phone{
+  color:#e3c272!important;
+  background:rgba(205,168,93,.035)!important;
+}
+.service-phone svg{
+  width:55%;
+  height:55%;
+  display:block;
+  fill:currentColor;
+}
+
+/* FINISH: perfectly center extension phone icons on mobile */
+.quick-service-card{
+  display:grid!important;
+  grid-template-columns:31px minmax(0,1fr)!important;
+  align-items:center!important;
+  justify-content:center!important;
+  column-gap:10px!important;
+}
+.service-phone{
+  width:31px!important;
+  height:31px!important;
+  margin:0!important;
+  padding:0!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  align-self:center!important;
+  justify-self:center!important;
+  line-height:0!important;
+  box-sizing:border-box!important;
+}
+.service-phone svg{
+  width:14px!important;
+  height:14px!important;
+  display:block!important;
+  margin:0!important;
+  padding:0!important;
+  transform:none!important;
+}
+.quick-service-card > div{
+  align-self:center!important;
+  justify-self:start!important;
+}
+@media(max-width:640px){
+  .quick-service-card{
+    grid-template-columns:24px minmax(0,1fr)!important;
+    column-gap:6px!important;
+    padding:7px 4px!important;
+  }
+  .service-phone{
+    width:24px!important;
+    height:24px!important;
+  }
+  .service-phone svg{
+    width:11px!important;
+    height:11px!important;
+  }
+}
+@media(max-width:380px){
+  .quick-service-card{
+    grid-template-columns:22px minmax(0,1fr)!important;
+    column-gap:5px!important;
+  }
+  .service-phone{
+    width:22px!important;
+    height:22px!important;
+  }
+  .service-phone svg{
+    width:10px!important;
+    height:10px!important;
+  }
+}
