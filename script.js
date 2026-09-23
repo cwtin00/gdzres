@@ -599,6 +599,74 @@ let menuData = [
 },
 
     {
+      title: "Yeni Rakı Yeni Seri",
+
+      items: [
+        {
+          name: "20'lik",
+          description: "20 cl Yeni Rakı Yeni Seri.",
+          calories: "",
+          price: "₺900"
+        },
+        {
+          name: "35'lik",
+          description: "35 cl Yeni Rakı Yeni Seri.",
+          calories: "",
+          price: "₺1.350"
+        },
+        {
+          name: "50'lik",
+          description: "50 cl Yeni Rakı Yeni Seri.",
+          calories: "",
+          price: "₺1.900"
+        },
+        {
+          name: "70'lik",
+          description: "70 cl Yeni Rakı Yeni Seri.",
+          calories: "",
+          price: "₺2.500"
+        }
+      ]
+    },
+
+    {
+      title: "Sarı Zeybek 3 Meşe",
+
+      items: [
+        {
+          name: "20'lik",
+          description: "20 cl Sarı Zeybek 3 Meşe Rakı.",
+          calories: "",
+          price: "₺1.250"
+        },
+        {
+          name: "35'lik",
+          description: "35 cl Sarı Zeybek 3 Meşe Rakı.",
+          calories: "",
+          price: "₺2.000"
+        },
+        {
+          name: "50'lik",
+          description: "50 cl Sarı Zeybek 3 Meşe Rakı.",
+          calories: "",
+          price: "₺2.500"
+        },
+        {
+          name: "70'lik",
+          description: "70 cl Sarı Zeybek 3 Meşe Rakı.",
+          calories: "",
+          price: "₺3.400"
+        },
+        {
+          name: "100'lük",
+          description: "100 cl Sarı Zeybek 3 Meşe Rakı.",
+          calories: "",
+          price: "₺4.200"
+        }
+      ]
+    },
+
+    {
       title: "Tekirdağ Altın Seri",
 
       items: [
@@ -664,6 +732,36 @@ let menuData = [
           description: "100 cl Chivas Viski.",
           calories: "≈ 850 kcal",
           price: "₺4.750"
+        }
+      ]
+    },
+    {
+      title: "Scotch Blue",
+
+      items: [
+        {
+          name: "35'lik",
+          description: "35 cl Scotch Blue Viski.",
+          calories: "",
+          price: "₺1.500"
+        },
+        {
+          name: "50'lik",
+          description: "50 cl Scotch Blue Viski.",
+          calories: "",
+          price: "₺2.000"
+        },
+        {
+          name: "70'lik",
+          description: "70 cl Scotch Blue Viski.",
+          calories: "",
+          price: "₺2.400"
+        },
+        {
+          name: "100'lük",
+          description: "100 cl Scotch Blue Viski.",
+          calories: "",
+          price: "₺3.250"
         }
       ]
     }
@@ -859,6 +957,46 @@ function normalizeFirebaseMenu(value) {
     }
     return category;
   });
+}
+
+// Firebase'teki eski menu kaydi yeni eklenen urun gruplarini icermese bile
+// bu gruplari sitede koru. Mevcut Firebase urun/fiyat verilerine dokunmaz.
+function ensureRequiredGroups(menu) {
+  const initial = window.GDZ_INITIAL_MENU || [];
+  const required = {
+    rakilar: ["Yeni Rakı Yeni Seri", "Sarı Zeybek 3 Meşe"],
+    viskiler: ["Scotch Blue"]
+  };
+
+  Object.entries(required).forEach(([categoryId, groupTitles]) => {
+    const targetCategory = menu.find(category => category.id === categoryId);
+    const sourceCategory = initial.find(category => category.id === categoryId);
+    if (!targetCategory || !sourceCategory) return;
+
+    targetCategory.groups = firebaseList(targetCategory.groups);
+    const sourceGroups = firebaseList(sourceCategory.groups);
+
+    groupTitles.forEach(title => {
+      const sourceGroup = sourceGroups.find(group => group.title === title);
+      if (!sourceGroup) return;
+
+      const existing = targetCategory.groups.find(group => group.title === title);
+      if (!existing) {
+        targetCategory.groups.push(JSON.parse(JSON.stringify(sourceGroup)));
+        return;
+      }
+
+      // Grup varsa ama eksik hacimler varsa sadece eksikleri ekle.
+      existing.items = firebaseList(existing.items);
+      firebaseList(sourceGroup.items).forEach(sourceItem => {
+        if (!existing.items.some(item => item.name === sourceItem.name)) {
+          existing.items.push(JSON.parse(JSON.stringify(sourceItem)));
+        }
+      });
+    });
+  });
+
+  return menu;
 }
 
 if (document.getElementById("menu")) {
@@ -1067,7 +1205,7 @@ document.addEventListener("DOMContentLoaded", () => {
     window.gdzDatabase.ref("menu").on("value", snapshot => {
       const liveMenu = normalizeFirebaseMenu(snapshot.val());
       if (!liveMenu.length) return;
-      menuData = window.applyGDZProductImages(applyMenuTaxonomy(liveMenu));
+      menuData = window.applyGDZProductImages(applyMenuTaxonomy(ensureRequiredGroups(liveMenu)));
       if (!menuData.some(category => category.id === activeCategoryId)) activeCategoryId = menuData[0].id;
       createCategoryNav();
       showCategory(activeCategoryId, false);

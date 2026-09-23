@@ -94,12 +94,15 @@
     "İstanbul Blue":"istanbul-blue.webp",
     "Tekirdağ Altın Seri":"tekirdagaltinseri.webp",
     "Chivas":"chivas.webp",
+    "Scotch Blue":"scotch-blue.webp",
+    "Yeni Rakı Yeni Seri":"yeni-raki-yeni-seri.webp",
+    "Sarı Zeybek 3 Meşe":"sari-zeybek-3-mese.webp",
     "Gilbey's Gin":"gilbeys-gin.webp",
     "Olmeca":"olmeca.webp"
   };
   window.GDZ_PRODUCT_IMAGES = products;
   window.applyGDZProductImages = function (menu) {
-    const revision = "2026-09-21-photos-v1";
+    const revision = "2026-09-24-photos-v2";
     if (!Array.isArray(menu) || !menu.length || menu[0].photoRevision === revision) return menu;
     menu.forEach(category => {
       if (Array.isArray(category.groups)) {

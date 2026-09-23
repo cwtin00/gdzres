@@ -165,8 +165,12 @@ function productCard(item, index, groupIndex = null) {
     <input class="desc" value="${escapeHtml(item.description)}" aria-label="Açıklama">
     <input class="calories" value="${escapeHtml(item.calories || "")}" aria-label="Kalori">
     <input class="price" value="${escapeHtml(item.price)}" aria-label="Fiyat">
+    <div class="order-actions">
+      <button class="move-up" type="button" title="Yukarı taşı" aria-label="Ürünü yukarı taşı">↑</button>
+      <button class="move-down" type="button" title="Aşağı taşı" aria-label="Ürünü aşağı taşı">↓</button>
+    </div>
     <button class="delete-item" type="button" title="Ürünü sil">×</button>
-    <button class="visibility ${item.visible === false ? "off" : ""}" type="button">${item.visible === false ? "GİZLİ" : "YAYINDA"}</button>
+    <button class="visibility ${item.visible === false ? "off" : ""}" type="button">${item.visible === false ? "PASİF" : "AKTİF"}</button>
     <div class="product-image-field"><span>FOTOĞRAF</span><input class="image" value="${escapeHtml(item.image || "")}" placeholder="Boşsa kategori görseli kullanılır — image/urun.webp"></div>
   </div>`;
 }
@@ -258,6 +262,18 @@ products.addEventListener("click", async event => {
   const card = event.target.closest(".product-card");
   if (!card) return;
   const located = locateItem(card.dataset.path);
+  if (event.target.matches(".move-up")) {
+    if (located.index === 0) return toast("Ürün zaten ilk sırada");
+    [located.items[located.index - 1], located.items[located.index]] = [located.items[located.index], located.items[located.index - 1]];
+    await saveMenu("Ürün yukarı taşındı");
+    return;
+  }
+  if (event.target.matches(".move-down")) {
+    if (located.index >= located.items.length - 1) return toast("Ürün zaten son sırada");
+    [located.items[located.index + 1], located.items[located.index]] = [located.items[located.index], located.items[located.index + 1]];
+    await saveMenu("Ürün aşağı taşındı");
+    return;
+  }
   if (event.target.matches(".delete-item")) {
     if (!confirm("Bu ürün silinsin mi?")) return;
     located.items.splice(located.index, 1);

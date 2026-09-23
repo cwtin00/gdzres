@@ -89,5 +89,5 @@ window.GDZ_EN = {
     "Corona Cerveza":["Corona Cerveza","Corona Cerveza beer, served chilled."],
     "Miller Genuine Draft":["Miller Genuine Draft","Miller Genuine Draft beer, served chilled."]
   },
-  groups: {"Beylerbeyi":"Beylerbeyi Raki","Efe Gold":"Efe Gold Raki","İstanbul Blue":"Istanbul Blue Vodka","Tekirdağ Altın Seri":"Tekirdağ Gold Series Raki","Chivas":"Chivas Whisky","Gilbey's Gin":"Gilbey's Gin","Olmeca":"Olmeca Tequila"}
+  groups: {"Beylerbeyi":"Beylerbeyi Raki","Efe Gold":"Efe Gold Raki","İstanbul Blue":"Istanbul Blue Vodka","Yeni Rakı Yeni Seri":"Yeni Raki New Series","Sarı Zeybek 3 Meşe":"Sari Zeybek 3 Oak Raki","Tekirdağ Altın Seri":"Tekirdağ Gold Series Raki","Chivas":"Chivas Whisky","Gilbey's Gin":"Gilbey's Gin","Olmeca":"Olmeca Tequila"}
 };
