@@ -9,7 +9,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="admin.css">
-  <style>#newProductGroup,#newProductGroup option{color:#f4e6cb!important;background:#100708!important;font-family:Montserrat,Arial,sans-serif!important;font-size:12px!important;font-weight:700!important}#newProductGroup{min-height:46px}.product-image-field{grid-column:2/-1;display:grid;grid-template-columns:74px 1fr;align-items:center;gap:8px}.product-image-field span{color:#cda85d;font:700 8px Montserrat,sans-serif;letter-spacing:.08em}.product-image-field input{min-width:0}@media(max-width:820px){.product-image-field{grid-column:2/-1;grid-template-columns:62px 1fr}}</style>
 </head>
 <body>
   <section class="login-screen" id="loginScreen">
@@ -17,7 +16,7 @@
       <img src="image/gdz-logo-transparent.png" alt="GDZ Restaurant">
       <span>YÖNETİM SİSTEMİ</span>
       <h1>Admin Girişi</h1>
-      <p>Menü içeriklerini güvenli biçimde yönetin.</p>
+      <p>Menü ürünlerini, fiyatları ve kategorileri buradan yönetebilirsiniz.</p>
       <label>E-posta<input id="email" type="email" autocomplete="username" required></label>
       <label>Şifre<input id="password" type="password" autocomplete="current-password" required></label>
       <button type="submit">Giriş Yap</button>
@@ -27,44 +26,95 @@
 
   <div class="dashboard" id="dashboard" hidden>
     <header class="admin-header">
-      <div class="admin-brand"><img src="image/gdz-logo-transparent.png" alt=""><div><strong>GDZ RESTAURANT</strong><small>MENÜ YÖNETİMİ</small></div></div>
-      <div class="header-actions"><a href="index.html" target="_blank">Menüyü Gör</a><button id="logoutButton" type="button">Çıkış</button></div>
+      <div class="admin-brand">
+        <img src="image/gdz-logo-transparent.png" alt="">
+        <div><strong>GDZ RESTAURANT</strong><small>MENÜ YÖNETİMİ</small></div>
+      </div>
+      <div class="header-actions">
+        <a href="index.html" target="_blank">Menüyü Gör</a>
+        <button id="logoutButton" type="button">Çıkış</button>
+      </div>
     </header>
 
     <main class="admin-main">
       <section class="overview">
         <div><small>KATEGORİ</small><strong id="categoryCount">0</strong></div>
         <div><small>ÜRÜN</small><strong id="productCount">0</strong></div>
-        <div><small>DURUM</small><strong class="online">CANLI</strong></div>
+        <div><small>SİSTEM</small><strong class="online">CANLI</strong></div>
       </section>
 
-      <section class="toolbar">
-        <div><span>Kategori seçimi</span><select id="categorySelect"></select></div>
-        <button id="addCategoryButton" type="button">+ Yeni Kategori</button>
-      </section>
-
-      <section class="category-editor" id="categoryEditor">
-        <div class="section-head"><div><span>SEÇİLİ KATEGORİ</span><h2 id="categoryHeading">—</h2></div><button class="danger ghost" id="deleteCategoryButton" type="button">Kategoriyi Sil</button></div>
-        <div class="category-fields">
-          <label>Kategori adı<input id="categoryTitle" type="text"></label>
-          <label>Kapak görsel yolu<input id="categoryImage" type="text" placeholder="image/ornek.webp"></label>
-          <button id="saveCategoryButton" type="button">Kategoriyi Kaydet</button>
+      <section class="category-panel">
+        <div class="panel-title">
+          <span>1. ADIM</span>
+          <h2>Kategori Seç</h2>
+          <p>Sadece seçtiğiniz kategorinin ürünleri aşağıda gösterilir.</p>
         </div>
+        <div class="category-picker">
+          <label>
+            <span>Menü kategorisi</span>
+            <select id="categorySelect"></select>
+          </label>
+          <button id="addCategoryButton" class="secondary-action" type="button">+ Yeni Kategori</button>
+        </div>
+
+        <details class="category-settings" id="categorySettings">
+          <summary>Kategori ayarlarını aç</summary>
+          <div class="category-settings-body">
+            <label>Kategori adı<input id="categoryTitle" type="text"></label>
+            <label>Kapak görsel yolu<input id="categoryImage" type="text" placeholder="image/ornek.webp"></label>
+            <div class="category-setting-actions">
+              <button id="saveCategoryButton" type="button">Değişiklikleri Kaydet</button>
+              <button class="danger ghost" id="deleteCategoryButton" type="button">Kategoriyi Sil</button>
+            </div>
+          </div>
+        </details>
       </section>
 
       <section class="products-section">
-        <div class="section-head"><div><span>ÜRÜN YÖNETİMİ</span><h2>Menü Ürünleri</h2></div><button id="addProductButton" type="button">+ Yeni Ürün</button></div>
+        <div class="section-head">
+          <div>
+            <span>2. ADIM</span>
+            <h2 id="categoryHeading">Menü Ürünleri</h2>
+            <p>Ürün adı, açıklama, fiyat ve fotoğraf bilgilerini buradan değiştirebilirsiniz.</p>
+          </div>
+          <button id="addProductButton" type="button">+ Yeni Ürün Ekle</button>
+        </div>
+        <div class="selected-category-note">Şu an düzenlenen kategori: <strong id="selectedCategoryName">—</strong></div>
         <div class="products" id="products"></div>
       </section>
     </main>
   </div>
 
   <div class="modal" id="categoryModal" hidden>
-    <form class="modal-card" id="categoryForm"><button class="modal-close" type="button" data-close>×</button><span>YENİ KATEGORİ</span><h2>Kategori oluştur</h2><label>Kategori adı<input id="newCategoryTitle" required></label><label>Kapak görsel yolu<input id="newCategoryImage" value="image/ana.webp" required></label><button type="submit">Kategoriyi Ekle</button></form>
+    <form class="modal-card" id="categoryForm">
+      <button class="modal-close" type="button" data-close>×</button>
+      <span>YENİ KATEGORİ</span>
+      <h2>Kategori oluştur</h2>
+      <p class="modal-help">Örneğin: Viskiler, Tatlılar, Sıcak İçecekler.</p>
+      <label>Kategori adı<input id="newCategoryTitle" placeholder="Örn. Kokteyller" required></label>
+      <label>Kapak görsel yolu <small>(isteğe bağlı)</small><input id="newCategoryImage" value="image/ana.webp" placeholder="image/ana.webp"></label>
+      <button type="submit">Kategoriyi Ekle</button>
+    </form>
   </div>
 
   <div class="modal" id="productModal" hidden>
-    <form class="modal-card" id="productForm"><button class="modal-close" type="button" data-close>×</button><span>YENİ ÜRÜN</span><h2>Ürün oluştur</h2><label id="groupField" hidden>Alt grup<select id="newProductGroup"></select></label><label>Ürün adı<input id="newProductName" required></label><label>Açıklama<textarea id="newProductDescription" rows="3"></textarea></label><label>Ürün fotoğraf yolu<input id="newProductImage" placeholder="image/urun.webp"></label><label>Kalori bilgisi<input id="newProductCalories" placeholder="≈ 500 kcal"></label><label>Fiyat<input id="newProductPrice" placeholder="₺500" required></label><button type="submit" id="submitProductButton">Ürünü Ekle</button><div class="form-message" id="productMessage"></div></form>
+    <form class="modal-card product-modal-card" id="productForm">
+      <button class="modal-close" type="button" data-close>×</button>
+      <span>YENİ ÜRÜN</span>
+      <h2>Yeni ürün ekle</h2>
+      <div class="modal-category-line">Eklenecek kategori: <strong id="newProductCategoryName">—</strong></div>
+      <label id="groupField" hidden>Alt grup<select id="newProductGroup"></select></label>
+      <label>Ürün adı<input id="newProductName" placeholder="Örn. Jack Daniel's 70 cl" required></label>
+      <label>Açıklama<textarea id="newProductDescription" rows="3" placeholder="Ürünün kısa açıklaması"></textarea></label>
+      <div class="form-grid-two">
+        <label>Fiyat<input id="newProductPrice" placeholder="₺2.500" required></label>
+        <label>Kalori <small>(isteğe bağlı)</small><input id="newProductCalories" placeholder="≈ 500 kcal"></label>
+      </div>
+      <label>Fotoğraf yolu <small>(fotoğraf yoksa boş bırakabilirsiniz)</small><input id="newProductImage" placeholder="image/products/urun-adi.webp"></label>
+      <div class="photo-help">Fotoğrafı daha sonra GitHub'daki <b>image/products</b> klasörüne ekleyebilirsiniz.</div>
+      <button type="submit" id="submitProductButton">Ürünü Ekle</button>
+      <div class="form-message" id="productMessage"></div>
+    </form>
   </div>
 
   <div class="toast" id="toast"></div>

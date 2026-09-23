@@ -159,26 +159,36 @@ function renderDashboard() {
 
 function productCard(item, index, groupIndex = null) {
   const path = groupIndex === null ? `${index}` : `${groupIndex}:${index}`;
+  const safeName = escapeHtml(item.name || "");
+  const safeDescription = escapeHtml(item.description || "");
+  const safeCalories = escapeHtml(item.calories || "");
+  const safePrice = escapeHtml(item.price || "");
+  const safeImage = escapeHtml(item.image || "");
   return `<div class="product-card" data-path="${path}">
-    <span class="number">${String(index + 1).padStart(2,"0")}</span>
-    <input class="name" value="${escapeHtml(item.name)}" aria-label="Ürün adı">
-    <input class="desc" value="${escapeHtml(item.description)}" aria-label="Açıklama">
-    <input class="calories" value="${escapeHtml(item.calories || "")}" aria-label="Kalori">
-    <input class="price" value="${escapeHtml(item.price)}" aria-label="Fiyat">
-    <div class="order-actions">
+    <div class="product-card-top">
+      <span class="number">${String(index + 1).padStart(2,"0")}</span>
+      <label class="product-name-wrap"><span class="field-label">ÜRÜN ADI</span><input class="name" value="${safeName}" aria-label="Ürün adı"></label>
+    </div>
+    <div class="product-main-fields">
+      <label class="product-field"><span class="field-label">AÇIKLAMA</span><textarea class="desc" rows="2" aria-label="Açıklama">${safeDescription}</textarea></label>
+      <label class="product-field"><span class="field-label">FİYAT</span><input class="price" value="${safePrice}" aria-label="Fiyat"></label>
+      <label class="product-field"><span class="field-label">KALORİ</span><input class="calories" value="${safeCalories}" aria-label="Kalori"></label>
+    </div>
+    <label class="product-image-field"><span class="field-label">FOTOĞRAF YOLU</span><input class="image" value="${safeImage}" placeholder="image/products/urun-adi.webp"></label>
+    <div class="product-actions">
       <button class="move-up" type="button" title="Yukarı taşı" aria-label="Ürünü yukarı taşı">↑</button>
       <button class="move-down" type="button" title="Aşağı taşı" aria-label="Ürünü aşağı taşı">↓</button>
+      <button class="visibility ${item.visible === false ? "off" : ""}" type="button">${item.visible === false ? "PASİF" : "AKTİF"}</button>
+      <button class="delete-item" type="button" title="Ürünü sil">ÜRÜNÜ SİL</button>
     </div>
-    <button class="delete-item" type="button" title="Ürünü sil">×</button>
-    <button class="visibility ${item.visible === false ? "off" : ""}" type="button">${item.visible === false ? "PASİF" : "AKTİF"}</button>
-    <div class="product-image-field"><span>FOTOĞRAF</span><input class="image" value="${escapeHtml(item.image || "")}" placeholder="Boşsa kategori görseli kullanılır — image/urun.webp"></div>
   </div>`;
 }
 
 function renderCategory() {
   const category = currentCategory();
   if (!category) return;
-  $("categoryHeading").textContent = category.title;
+  $("categoryHeading").textContent = category.title + " Ürünleri";
+  $("selectedCategoryName").textContent = category.title;
   $("categoryTitle").value = category.title;
   $("categoryImage").value = category.image || "";
   if (category.groups) {
@@ -246,7 +256,7 @@ $("deleteCategoryButton").addEventListener("click", async () => {
 });
 
 products.addEventListener("change", async event => {
-  if (!event.target.matches("input")) return;
+  if (!event.target.matches("input, textarea")) return;
   const card = event.target.closest(".product-card");
   const located = locateItem(card.dataset.path);
   const item = located.items[located.index];
@@ -297,7 +307,7 @@ $("categoryForm").addEventListener("submit", async event => {
   const title = $("newCategoryTitle").value.trim();
   let id = slugify(title), suffix = 2;
   while (adminMenu.some(category => category.id === id)) id = `${slugify(title)}-${suffix++}`;
-  adminMenu.push({id, title, image: $("newCategoryImage").value.trim(), items: []});
+  adminMenu.push({id, title, image: $("newCategoryImage").value.trim() || "image/ana.webp", items: []});
   selectedCategoryId = id;
   await saveMenu("Kategori eklendi");
   event.target.reset(); closeModals();
@@ -306,6 +316,7 @@ $("categoryForm").addEventListener("submit", async event => {
 $("addProductButton").addEventListener("click", () => {
   const category = currentCategory();
   const groupField = $("groupField");
+  $("newProductCategoryName").textContent = category ? category.title : "—";
   $("productMessage").textContent = "";
   if (category.groups) {
     groupField.hidden = false;
