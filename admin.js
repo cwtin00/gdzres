@@ -58,6 +58,42 @@ function normalizeMenu(value) {
   return menu;
 }
 
+// Sitede kodla eklenmiş yeni ürün gruplarını mevcut Firebase menüsüne de ekler.
+// Mevcut Firebase ürünlerini/fiyatlarını değiştirmez; yalnızca eksik grup veya ürünleri tamamlar.
+function ensureRequiredGroups(menu) {
+  const initial = window.GDZ_INITIAL_MENU || [];
+  const required = {
+    rakilar: ["Yeni Rakı Yeni Seri", "Sarı Zeybek 3 Meşe"],
+    viskiler: ["Scotch Blue"]
+  };
+
+  Object.entries(required).forEach(([categoryId, groupTitles]) => {
+    const targetCategory = menu.find(category => category.id === categoryId);
+    const sourceCategory = initial.find(category => category.id === categoryId);
+    if (!targetCategory || !sourceCategory) return;
+
+    targetCategory.groups = asArray(targetCategory.groups);
+    const sourceGroups = asArray(sourceCategory.groups);
+
+    groupTitles.forEach(title => {
+      const sourceGroup = sourceGroups.find(group => group.title === title);
+      if (!sourceGroup) return;
+      let existing = targetCategory.groups.find(group => group.title === title);
+      if (!existing) {
+        targetCategory.groups.push(JSON.parse(JSON.stringify(sourceGroup)));
+        return;
+      }
+      existing.items = asArray(existing.items);
+      asArray(sourceGroup.items).forEach(sourceItem => {
+        if (!existing.items.some(item => item.name === sourceItem.name)) {
+          existing.items.push(JSON.parse(JSON.stringify(sourceItem)));
+        }
+      });
+    });
+  });
+  return menu;
+}
+
 function applyRequestedMenuUpdate(menu) {
   if (menu[0] && menu[0].priceRevision === "2026-09-21") return menu;
   const updates = {
@@ -225,9 +261,9 @@ auth.onAuthStateChanged(async user => {
   loginScreen.hidden = true;
   dashboard.hidden = false;
   const snapshot = await menuRef.once("value");
-  if (!snapshot.exists()) await menuRef.set(window.applyGDZProductImages(applyBeerMenuUpdate(applyRequestedMenuUpdate(normalizeMenu(window.GDZ_INITIAL_MENU)))));
+  if (!snapshot.exists()) await menuRef.set(window.applyGDZProductImages(ensureRequiredGroups(applyBeerMenuUpdate(applyRequestedMenuUpdate(normalizeMenu(window.GDZ_INITIAL_MENU))))));
   else {
-    const updatedMenu = window.applyGDZProductImages(applyBeerMenuUpdate(applyRequestedMenuUpdate(normalizeMenu(snapshot.val()))));
+    const updatedMenu = window.applyGDZProductImages(ensureRequiredGroups(applyBeerMenuUpdate(applyRequestedMenuUpdate(normalizeMenu(snapshot.val())))));
     if (JSON.stringify(updatedMenu) !== JSON.stringify(snapshot.val())) await menuRef.set(updatedMenu);
   }
   menuRef.on("value", value => {
