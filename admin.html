@@ -110,8 +110,14 @@
         <label>Fiyat<input id="newProductPrice" placeholder="₺2.500" required></label>
         <label>Kalori <small>(isteğe bağlı)</small><input id="newProductCalories" placeholder="≈ 500 kcal"></label>
       </div>
-      <label>Fotoğraf yolu <small>(fotoğraf yoksa boş bırakabilirsiniz)</small><input id="newProductImage" placeholder="image/products/urun-adi.webp"></label>
-      <div class="photo-help">Fotoğrafı daha sonra GitHub'daki <b>image/products</b> klasörüne ekleyebilirsiniz.</div>
+      <label>Fotoğraf <small>(isteğe bağlı)</small></label>
+      <div class="gallery-upload-box">
+        <input id="newProductFile" type="file" accept="image/*" hidden>
+        <button type="button" class="gallery-button" id="newProductGalleryButton">📷 GALERİDEN FOTOĞRAF SEÇ</button>
+        <img id="newProductPreview" class="upload-preview" alt="Fotoğraf önizleme" hidden>
+        <div id="newProductUploadStatus" class="photo-help">Telefondan galeriyi açıp fotoğraf seçebilirsiniz.</div>
+      </div>
+      <label class="legacy-image-path">Fotoğraf yolu <small>(mevcut GitHub fotoğrafları için)</small><input id="newProductImage" placeholder="image/products/urun-adi.webp"></label>
       <button type="submit" id="submitProductButton">Ürünü Ekle</button>
       <div class="form-message" id="productMessage"></div>
     </form>
@@ -122,6 +128,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-database-compat.js"></script>
   <script src="firebase-config.js"></script>
+  <script src="cloudinary-config.js"></script>
   <script src="product-images.js"></script>
   <script src="script.js"></script>
   <script src="admin.js"></script>

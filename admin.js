@@ -210,7 +210,12 @@ function productCard(item, index, groupIndex = null) {
       <label class="product-field"><span class="field-label">FİYAT</span><input class="price" value="${safePrice}" aria-label="Fiyat"></label>
       <label class="product-field"><span class="field-label">KALORİ</span><input class="calories" value="${safeCalories}" aria-label="Kalori"></label>
     </div>
-    <label class="product-image-field"><span class="field-label">FOTOĞRAF YOLU</span><input class="image" value="${safeImage}" placeholder="image/products/urun-adi.webp"></label>
+    <label class="product-image-field"><span class="field-label">FOTOĞRAF</span><input class="image" value="${safeImage}" placeholder="image/products/urun-adi.webp"></label>
+    <div class="inline-gallery-upload">
+      <input class="edit-image-file" type="file" accept="image/*" hidden>
+      <button class="edit-gallery-button" type="button">📷 GALERİDEN DEĞİŞTİR</button>
+      <span class="edit-upload-status"></span>
+    </div>
     <div class="product-actions">
       <button class="move-up" type="button" title="Yukarı taşı" aria-label="Ürünü yukarı taşı">↑</button>
       <button class="move-down" type="button" title="Aşağı taşı" aria-label="Ürünü aşağı taşı">↓</button>
@@ -332,6 +337,37 @@ products.addEventListener("click", async event => {
   }
 });
 
+// Mevcut urunlerde "Galeriden Degistir" butonlari
+products.addEventListener("click", event => {
+  if (!event.target.matches(".edit-gallery-button")) return;
+  const card = event.target.closest(".product-card");
+  const input = card && card.querySelector(".edit-image-file");
+  if (input) input.click();
+});
+
+products.addEventListener("change", async event => {
+  if (!event.target.matches(".edit-image-file")) return;
+  const input = event.target;
+  const card = input.closest(".product-card");
+  const status = card.querySelector(".edit-upload-status");
+  const button = card.querySelector(".edit-gallery-button");
+  const file = input.files && input.files[0];
+  if (!file) return;
+  button.disabled = true;
+  try {
+    const url = await uploadImageToCloudinary(file, status);
+    card.querySelector(".image").value = url;
+    const located = locateItem(card.dataset.path);
+    located.items[located.index].image = url;
+    await saveMenu("Ürün fotoğrafı güncellendi");
+  } catch (error) {
+    status.textContent = "⚠ " + error.message;
+  } finally {
+    button.disabled = false;
+    input.value = "";
+  }
+});
+
 function openModal(id) { $(id).hidden = false; }
 function closeModals() { document.querySelectorAll(".modal").forEach(modal => modal.hidden = true); }
 document.querySelectorAll("[data-close]").forEach(button => button.addEventListener("click", closeModals));
@@ -348,6 +384,112 @@ $("categoryForm").addEventListener("submit", async event => {
   await saveMenu("Kategori eklendi");
   event.target.reset(); closeModals();
 });
+
+
+
+// Cloudinary: telefondan galeri yukleme
+// Yuklemeden once fotograflari tarayicida kucultur ve WebP'ye cevirir.
+// Bu sayede Cloudinary depolama/bant genisligi kullanimi ciddi oranda azalir.
+const IMAGE_OPTIMIZATION = { maxDimension: 1600, quality: 0.82, maxInputMB: 20 };
+
+function formatBytes(bytes) {
+  if (!Number.isFinite(bytes) || bytes <= 0) return "0 KB";
+  const mb = bytes / (1024 * 1024);
+  return mb >= 1 ? `${mb.toFixed(1)} MB` : `${Math.max(1, Math.round(bytes / 1024))} KB`;
+}
+
+async function optimizeImageForUpload(file, statusEl) {
+  if (!file || !file.type.startsWith("image/")) throw new Error("Lütfen bir fotoğraf seçin.");
+  if (file.size > IMAGE_OPTIMIZATION.maxInputMB * 1024 * 1024) {
+    throw new Error(`Fotoğraf ${IMAGE_OPTIMIZATION.maxInputMB} MB'dan küçük olmalı.`);
+  }
+  if (statusEl) statusEl.textContent = "Fotoğraf küçültülüyor ve WebP hazırlanıyor…";
+
+  let bitmap;
+  try {
+    bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
+  } catch (error) {
+    // Nadir/uyumsuz formatlarda orijinali kullan; yukleme yine calissin.
+    if (statusEl) statusEl.textContent = "Bu format tarayıcıda dönüştürülemedi; orijinal yükleniyor…";
+    return { blob: file, originalSize: file.size, optimizedSize: file.size, optimized: false };
+  }
+
+  const maxSide = Math.max(bitmap.width, bitmap.height);
+  const scale = Math.min(1, IMAGE_OPTIMIZATION.maxDimension / maxSide);
+  const width = Math.max(1, Math.round(bitmap.width * scale));
+  const height = Math.max(1, Math.round(bitmap.height * scale));
+
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext("2d", { alpha: false });
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, width, height);
+  ctx.drawImage(bitmap, 0, 0, width, height);
+  if (bitmap.close) bitmap.close();
+
+  const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/webp", IMAGE_OPTIMIZATION.quality));
+  if (!blob) throw new Error("Fotoğraf optimize edilemedi.");
+
+  // WebP orijinalden daha buyuk cikarsa gereksiz donusum yapma.
+  if (blob.size >= file.size && scale === 1) {
+    return { blob: file, originalSize: file.size, optimizedSize: file.size, optimized: false };
+  }
+  return { blob, originalSize: file.size, optimizedSize: blob.size, optimized: true };
+}
+
+async function uploadImageToCloudinary(file, statusEl) {
+  const cfg = window.CLOUDINARY_CONFIG || {};
+  if (!cfg.cloudName || !cfg.uploadPreset || cfg.cloudName === "BURAYA_CLOUD_NAME" || cfg.uploadPreset === "BURAYA_UPLOAD_PRESET") {
+    throw new Error("Cloudinary ayarları eksik. cloudinary-config.js dosyasını doldurun.");
+  }
+
+  const optimized = await optimizeImageForUpload(file, statusEl);
+  if (statusEl) {
+    statusEl.textContent = optimized.optimized
+      ? `Optimize edildi: ${formatBytes(optimized.originalSize)} → ${formatBytes(optimized.optimizedSize)}. Yükleniyor…`
+      : `Fotoğraf yükleniyor (${formatBytes(optimized.optimizedSize)})…`;
+  }
+
+  const data = new FormData();
+  const uploadName = (file.name || "urun-fotografi").replace(/\.[^.]+$/, "") + (optimized.optimized ? ".webp" : "");
+  data.append("file", optimized.blob, uploadName);
+  data.append("upload_preset", cfg.uploadPreset);
+  data.append("folder", cfg.folder || "gdzrestaurant/products");
+  const response = await fetch(`https://api.cloudinary.com/v1_1/${encodeURIComponent(cfg.cloudName)}/image/upload`, {method:"POST", body:data});
+  const result = await response.json();
+  if (!response.ok || !result.secure_url) throw new Error(result?.error?.message || "Fotoğraf yüklenemedi.");
+  if (statusEl) statusEl.textContent = optimized.optimized
+    ? `✓ Yüklendi • ${formatBytes(optimized.originalSize)} → ${formatBytes(optimized.optimizedSize)}`
+    : "✓ Fotoğraf yüklendi";
+  return result.secure_url;
+}
+
+function bindNewProductGalleryUpload() {
+  const button = $("newProductGalleryButton");
+  const input = $("newProductFile");
+  const preview = $("newProductPreview");
+  const status = $("newProductUploadStatus");
+  if (!button || !input) return;
+  button.addEventListener("click", () => input.click());
+  input.addEventListener("change", async () => {
+    const file = input.files && input.files[0];
+    if (!file) return;
+    preview.src = URL.createObjectURL(file);
+    preview.hidden = false;
+    button.disabled = true;
+    try {
+      const url = await uploadImageToCloudinary(file, status);
+      $("newProductImage").value = url;
+      preview.src = url;
+    } catch (error) {
+      status.textContent = "⚠ " + error.message;
+      input.value = "";
+    } finally { button.disabled = false; }
+  });
+}
+
+bindNewProductGalleryUpload();
 
 $("addProductButton").addEventListener("click", () => {
   const category = currentCategory();
