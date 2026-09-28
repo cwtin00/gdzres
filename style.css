@@ -322,7 +322,7 @@ body{font-family:"Inter",Arial,sans-serif}
 .category-scroll-bar .category-option:nth-child(odd){border-right:1px solid rgba(205,168,93,.22)!important}
 .category-scroll-bar .category-option:before{display:none!important}
 .category-scroll-bar .category-option small{font:700 8px/1 "Montserrat",Arial,sans-serif!important;color:#8d744d!important;letter-spacing:.05em}
-.category-scroll-bar .category-option span{font:700 9px/1 "Montserrat",Arial,sans-serif!important;letter-spacing:.055em!important;text-transform:uppercase}
+.category-scroll-bar .category-option span{font:700 13px/1 "Montserrat",Arial,sans-serif!important;letter-spacing:.055em!important;text-transform:uppercase}
 .category-scroll-bar .category-option i{display:none!important}
 .category-scroll-bar .category-option:hover{transform:translateY(-1px);border-color:rgba(219,181,106,.52)!important;color:#f5e6c9!important}
 .category-scroll-bar .category-option.active{
@@ -338,5 +338,5 @@ body{font-family:"Inter",Arial,sans-serif}
   .category-scroll-control:before,.category-scroll-control:after{width:18px}
   .category-scroll-bar .category-menu{gap:7px;padding:1px 17px 3px!important}
   .category-scroll-bar .category-option{min-height:40px!important;padding:0 13px!important;gap:7px}
-  .category-scroll-bar .category-option span{font-size:8.5px!important}.category-scroll-bar .category-option small{font-size:7px!important}
+  .category-scroll-bar .category-option span{font-size:12px!important}.category-scroll-bar .category-option small{font-size:7px!important}
 }
