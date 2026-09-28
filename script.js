@@ -1171,7 +1171,10 @@ function updateActiveButton() {
 }
 
 function scrollActiveButtonToCenter() {
-  return;
+  const active = categoryMenu.querySelector(".category-option.active");
+  if (!active) return;
+  const left = active.offsetLeft - (categoryMenu.clientWidth - active.offsetWidth) / 2;
+  categoryMenu.scrollTo({ left: Math.max(0, left), behavior: "smooth" });
 }
 
 function handleBackToTop() {
@@ -1181,6 +1184,14 @@ function handleBackToTop() {
 
 backToTop.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
 window.addEventListener("scroll", handleBackToTop, { passive: true });
+
+// Desktop mouse wheel also moves the luxury category strip horizontally.
+categoryMenu.addEventListener("wheel", event => {
+  if (Math.abs(event.deltaY) > Math.abs(event.deltaX) && categoryMenu.scrollWidth > categoryMenu.clientWidth) {
+    event.preventDefault();
+    categoryMenu.scrollBy({ left: event.deltaY, behavior: "smooth" });
+  }
+}, { passive: false });
 categoryCurrent.addEventListener("click", () => {
   const isOpen = navShell.classList.toggle("open");
   categoryCurrent.setAttribute("aria-expanded", String(isOpen));
